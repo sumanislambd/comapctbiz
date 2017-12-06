@@ -1,8 +1,16 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Platform, ScrollView, Linking } from 'react-native';
+import { Button, Card, Icon } from 'react-native-elements';
 import { VictoryPie, VictoryLegend } from "victory-native";
 
 class CurrentBudgetScreen extends Component {
+    static navigationOptions = ({ navigation }) => ({
+    title: 'Current Revenue',
+    tabBarIcon: ({ tintColor }) => {
+        return <Icon name="money" size={30} color={tintColor} />;
+      },
+    headerRight: <Button title="Settings" onPress={() => { navigation.navigate('settings'); }} />
+  });
   render() {
     return (
       <View >
