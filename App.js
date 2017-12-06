@@ -1,9 +1,14 @@
+import _ from 'lodash';
+import Expo from 'expo';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Dimensions, AsyncStorage } from 'react-native';
 import { TabNavigator, StackNavigator } from 'react-navigation';
-import { AppLoading } from 'expo';
 import Data from './DataSimple';
 import DataDefault from './DataDefault';
+import { Provider } from  'react-redux';
+import { AppLoading } from 'expo';
+import store from './store';
+
 
 import AuthScreen from './screens/AuthScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
@@ -19,32 +24,74 @@ import {
 
 
 export default class App extends React.Component {
+   state = { token: null };
+ 
+  async componentWillMount() {
+      let token = await AsyncStorage.getItem('fb_token');
+ 
+      if (token) {
+          this.setState({ token });
+      } else {
+          this.setState({ token: false });
+      }
+      
+  }
+
+
   render() {
     const OnCarousel = ({ navigation }) => (<Carousel data={Data} navigation={navigation}/>);
-    
 
-    const MainNavigator = TabNavigator({
-     Carousel: {screen: OnCarousel},
-      welcome: { screen: WelcomeScreen },
-      auth: { screen: AuthScreen },
-      main: {
-        screen: TabNavigator ({
-          map: { screen: MapScreen },
-          data: { screen: DataScreen },
-            current: {
-              screen: StackNavigator ({
-                current: { screen: CurrentBudgetScreen },
+    let MainNavigator = null;
+ 
+    if (this.state.token) {
+    MainNavigator = TabNavigator({
+        map: { screen: MapScreen },
+        deck: { screen: DataScreen },
+        review: {
+          screen: StackNavigator({
+            review: { screen: CurrentBudgetScreen },
+            settings: { screen: SettingsScreen }
+          })
+        }
+      }, { tabBarPosition: 'bottom' })
+    } else {
+ 
+      MainNavigator = TabNavigator({
+       Carousel: {screen: OnCarousel},
+        auth: { screen: AuthScreen },
+        main: {
+          screen: TabNavigator({
+            map: { screen: MapScreen },
+            deck: { screen: DataScreen },
+            review: {
+              screen: StackNavigator({
+                review: { screen: CurrentBudgetScreen },
                 settings: { screen: SettingsScreen }
-            })
-          }
-        })
-      }
-    });
+              })
+            }
+          }, { tabBarPosition: 'bottom' })
+        }
+      },
+      {
+        lazy: true,
+        navigationOptions: {
+          tabBarVisible: false 
+        }
+      });
+    }
+
+     if (_.isNull(this.state.token)) {
+      return <AppLoading />;
+    }
+
 
     return (
-      <View style={styles.container}>
-        <MainNavigator />
-      </View>
+      <Provider store={store}>
+        <View style={styles.container}>
+          <MainNavigator />
+        </View>
+      </Provider>
+ 
     );
   }
 }
