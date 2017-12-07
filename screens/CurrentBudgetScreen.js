@@ -1,38 +1,101 @@
+'use strict';
 import React, { Component } from 'react';
-import { View, Text, Platform, ScrollView, Linking } from 'react-native';
-import { Button, Card, Icon } from 'react-native-elements';
-import { VictoryPie, VictoryLegend } from "victory-native";
+import {
+  StyleSheet,
+  Text,
+  ScrollView,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import { Button, Card } from 'react-native-elements';
+import Icon                 from 'react-native-vector-icons/SimpleLineIcons'
+
+import AreaSpline from '../js/charts/AreaSpline';
+import Pie from '../js/charts/Pie';
+import Theme from '../js/theme';
+import data from '../resources/data';
+
+type State = {
+  activeIndex: number,
+  spendingsPerYear: any
+}
 
 class CurrentBudgetScreen extends Component {
-    static navigationOptions = ({ navigation }) => ({
-    title: 'Current Revenue',
+  static navigationOptions = ({ navigation }) => ({
+    title: 'Current Budget',
     tabBarIcon: ({ tintColor }) => {
-        return <Icon name="money" size={30} color={tintColor} />;
+        return <Icon name="chart" size={25} color={tintColor} />;
       },
-    headerRight: <Button title="Settings" onPress={() => { navigation.navigate('settings'); }} />
+    headerRight: <Icon name="settings" size={25} onPress={() => { navigation.navigate('settings'); }} />
   });
+
+  state: State;
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeIndex: 0,
+      spendingsPerYear: data.spendingsPerYear,
+    };
+    this._onPieItemSelected = this._onPieItemSelected.bind(this);
+    this._shuffle = this._shuffle.bind(this);
+  }
+
+  _onPieItemSelected(newIndex){
+    this.setState({...this.state, activeIndex: newIndex, spendingsPerYear: this._shuffle(data.spendingsPerYear)});
+  }
+
+  _shuffle(a) {
+      for (let i = a.length; i; i--) {
+          let j = Math.floor(Math.random() * i);
+          [a[i - 1], a[j]] = [a[j], a[i - 1]];
+      }
+      return a;
+  }
+
   render() {
+    const height = 200;
+    const width = 500;
+
     return (
-      <View >
-     <VictoryPie
-       padAngle={3}
-      innerRadius={100}
-      colorScale={["tomato", "orange", "gold", "cyan", "navy", "pink", "green" ]}
-      data={[
-              { x: 1, y: 2, label: "1" },
-              { x: 2, y: 2, label: "2" },
-              { x: 3, y: 3, label: "3" },
-              { x: 4, y: 2, label: "4" },
-              { x: 5, y: 1, label: "5" },
-              { x: 6, y: 2, label: "6" },
-              { x: 7, y: 3, label: "7" }
-            ]}
-       labelRadius={150}
-       style={{ labels: { fill: "white", fontSize: 20, fontWeight: "bold" } }}
-          />
-          </View>
-      );
-    }
+      <ScrollView>
+        <View style={styles.container} >
+          <Text style={styles.chart_title}>Distribution of spending</Text>
+          <Pie
+            pieWidth={150}
+            pieHeight={150}
+            onItemSelected={this._onPieItemSelected}
+            colors={Theme.colors}
+            width={width}
+            height={height}
+            data={data.spendingsLastMonth} />
+          <Text style={styles.chart_title}>Spending per year in {data.spendingsLastMonth[this.state.activeIndex].name}</Text>
+          <AreaSpline
+            width={width}
+            height={height}
+            data={this.state.spendingsPerYear}
+            color={Theme.colors[this.state.activeIndex]} />
+        </View>
+      </ScrollView>
+    );
+  }
+}
+
+const styles = {
+  container: {
+    backgroundColor:'whitesmoke',
+    marginTop: 21,
+  },
+  chart_title : {
+    paddingTop: 15,
+    textAlign: 'center',
+    paddingBottom: 5,
+    paddingLeft: 5,
+    fontSize: 18,
+    backgroundColor:'white',
+    color: 'grey',
+    fontWeight:'bold',
+  }
 }
 
 export default CurrentBudgetScreen;

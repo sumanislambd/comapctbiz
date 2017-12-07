@@ -16,6 +16,7 @@ import MapScreen from './screens/MapScreen';
 import DataScreen from './screens/DataScreen';
 import CurrentBudgetScreen from './screens/CurrentBudgetScreen';
 import SettingsScreen from './screens/SettingsScreen';
+import InputScreen from './screens/InputScreen';
 
 import {
   Circle, Carousel, CarouselScale, CarouselVideo, CarouselVideoScale, FullSwipe, SwipeBlur, Simple, SwipeSimple, Game,
@@ -45,11 +46,12 @@ export default class App extends React.Component {
  
     if (this.state.token) {
     MainNavigator = TabNavigator({
-        map: { screen: MapScreen },
-        deck: { screen: DataScreen },
-        review: {
+        Analyze: { screen: InputScreen},
+        Map: { screen: MapScreen },
+        Data: { screen: DataScreen },
+        current: {
           screen: StackNavigator({
-            review: { screen: CurrentBudgetScreen },
+            current: { screen: CurrentBudgetScreen },
             settings: { screen: SettingsScreen }
           })
         }
@@ -61,11 +63,11 @@ export default class App extends React.Component {
         auth: { screen: AuthScreen },
         main: {
           screen: TabNavigator({
-            map: { screen: MapScreen },
-            deck: { screen: DataScreen },
-            review: {
+            Map: { screen: MapScreen },
+            Data: { screen: DataScreen },
+            current: {
               screen: StackNavigator({
-                review: { screen: CurrentBudgetScreen },
+                current: { screen: CurrentBudgetScreen },
                 settings: { screen: SettingsScreen }
               })
             }
@@ -75,7 +77,7 @@ export default class App extends React.Component {
       {
         lazy: true,
         navigationOptions: {
-          tabBarVisible: false 
+          tabBarVisible: false
         }
       });
     }
